@@ -24,8 +24,82 @@ namespace EntityFrameworkTestConsole
             //DoubleFindDatabase();
             //SingleOrDefaultNotInDatabaseButInContext();
             //QueryLocal();
-            ExplicitLoadIntoLocal();
+            //ExplicitLoadIntoLocal();
+            //EntryToAddNewEntity();
+            //EntryToModifyExistingEntityWithoutLoadingFromDatabase();
+            //EntryToModifyExistingEntityByLoadingFromDatabase();
+            //EntryToModifyByPropertyChanged();
+            EntryToModifyByPropertyChangedWithoutUsingFind();
             Console.ReadLine();
+        }
+
+        private static void EntryToModifyByPropertyChangedWithoutUsingFind()
+        {
+            var objectFromUser = new Person { Id = 1, Name = "Tester #2", BirthDate = new DateTime(1941, 12, 25) };
+            using (var context = new YourContext())
+            {
+                Console.WriteLine(context.Persons.Local.Count); //0
+                context.Entry(objectFromUser).State = EntityState.Modified;
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.SaveChanges();
+            }
+        }
+
+
+        private static void EntryToModifyByPropertyChanged()
+        {
+            var objectFromUser = new Person {Id = 1, Name="Test", BirthDate = new DateTime(1801, 12, 25)};
+            using (var context = new YourContext())
+            {
+                Console.WriteLine(context.Persons.Local.Count); //0
+                var existingPerson = context.Persons.Find(1);
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.Entry(existingPerson).CurrentValues.SetValues(objectFromUser);
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.SaveChanges();
+            }
+        }
+
+        private static void EntryToModifyExistingEntityByLoadingFromDatabase()
+        {
+            using (var context = new YourContext())
+            {
+                Console.WriteLine(context.Persons.Local.Count); //0
+                var existingPerson = context.Persons.Find(1);
+                Console.WriteLine(context.Persons.Local.Count); //1
+                existingPerson.Name = "Updated from database";
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.SaveChanges();
+            }
+        }
+
+        private static void EntryToModifyExistingEntityWithoutLoadingFromDatabase()
+        {
+            using (var context = new YourContext())
+            {
+                Console.WriteLine(context.Persons.Local.Count); //0
+                var existingPerson = new Person { Id=1, Name = "Updated Name"};
+                context.Persons.Attach(existingPerson);
+                var entryPerson = context.Entry(existingPerson);
+                Console.WriteLine(context.Persons.Local.Count); //1
+                entryPerson.Property(d => d.Name).IsModified = true;
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.SaveChanges();
+            }
+        }
+
+        private static void EntryToAddNewEntity()
+        {
+            using (var context = new YourContext())
+            {
+                Console.WriteLine(context.Persons.Local.Count); //0
+                var newPerson = new Person {Name = "New Person", BirthDate = new DateTime(1980, 1, 2) };
+                var entryPerson = context.Entry(newPerson);
+                Console.WriteLine(context.Persons.Local.Count); //0
+                entryPerson.State = EntityState.Added;
+                Console.WriteLine(context.Persons.Local.Count); //1
+                context.SaveChanges();
+            }
         }
 
         private static void ExplicitLoadIntoLocal()
