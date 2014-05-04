@@ -29,7 +29,7 @@ namespace EntityFrameworkTestConsole.DataAccessLayer
         //public DbSet<Address> Address { get; set; }
     }
 
-    public class CustomInitializer<T> : DropCreateDatabaseAlways<YourContext>
+    public class CustomInitializer<T> : DropCreateDatabaseIfModelChanges<YourContext>
     {
         public override void InitializeDatabase(YourContext context)
         {

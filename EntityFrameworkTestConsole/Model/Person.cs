@@ -11,7 +11,6 @@ namespace EntityFrameworkTestConsole.Model
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Name3 { get; set; }
         public DateTime BirthDate { get; set; }
 
         public ICollection<Person> Friends { get; set; }
