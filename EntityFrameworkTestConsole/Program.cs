@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -29,8 +30,46 @@ namespace EntityFrameworkTestConsole
             //EntryToModifyExistingEntityWithoutLoadingFromDatabase();
             //EntryToModifyExistingEntityByLoadingFromDatabase();
             //EntryToModifyByPropertyChanged();
-            EntryToModifyByPropertyChangedWithoutUsingFind();
+            //EntryToModifyByPropertyChangedWithoutUsingFind();
+            //LoadASubSetOfACollection(); //<--- Still need work
+            LazyLoadingAndEagerLoadingSameResult();
             Console.ReadLine();
+        }
+
+        private static void LazyLoadingAndEagerLoadingSameResult()
+        {
+            using (var context = new YourContext())
+            {
+                Console.WriteLine("No Lazy Loading, Eager Loading");
+                var person = context.Persons.Find(1);
+                context.Entry(person).Reference(d=>d.Residence).Load();
+                Console.WriteLine("City is " + person.Residence.Address.City);
+            }
+            using (var context = new YourContext())
+            {
+                context.Configuration.LazyLoadingEnabled = true;
+                Console.WriteLine("Lazy Loading, No Eager Loading");
+                var person = context.Persons.Find(1);
+                Console.WriteLine("City is " + person.Residence.Address.City);
+            }
+        }
+
+        /// <summary>
+        /// This code does not work as it should.
+        /// </summary>
+        private static void LoadASubSetOfACollection()
+        {
+            var objectFromUser = new Person { Id = 1};
+            using (var context = new YourContext())
+            {
+                objectFromUser = context.Persons.Find(objectFromUser.Id);
+                //context.Entry(objectFromUser).Collection(d => d.Friends).Load();//Load all sub list
+
+                //context.Entry(objectFromUser).Collection(d => d.Friends).Query().Where(f => f.Name.StartsWith("Seed")).Load(); // This fail and should not
+                context.Entry(objectFromUser).Collection(d => d.Friends).Query().Load();// This also fail and should not
+
+                Console.WriteLine(objectFromUser.Friends.Count);
+            } 
         }
 
         private static void EntryToModifyByPropertyChangedWithoutUsingFind()
