@@ -32,8 +32,23 @@ namespace EntityFrameworkTestConsole
             //EntryToModifyByPropertyChanged();
             //EntryToModifyByPropertyChangedWithoutUsingFind();
             //LoadASubSetOfACollection(); //<--- Still need work
-            LazyLoadingAndEagerLoadingSameResult();
+            //LazyLoadingAndEagerLoadingSameResult();
+            DetectChanges();
             Console.ReadLine();
+        }
+
+        private static void DetectChanges()
+        {
+            using (var context = new YourContext())
+            {
+                context.Configuration.AutoDetectChangesEnabled = false;
+                var personToModify = context.Persons.Find(1);
+                personToModify.BirthDate = new DateTime(3051,12,12);
+                Console.WriteLine(context.Entry(personToModify).State);
+                context.ChangeTracker.DetectChanges(); //Remove this line and it will not save the entity modification
+                Console.WriteLine(context.Entry(personToModify).State);
+                context.SaveChanges();
+            }
         }
 
         private static void LazyLoadingAndEagerLoadingSameResult()
