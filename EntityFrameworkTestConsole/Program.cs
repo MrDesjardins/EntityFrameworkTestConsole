@@ -33,8 +33,38 @@ namespace EntityFrameworkTestConsole
             //EntryToModifyByPropertyChangedWithoutUsingFind();
             //LoadASubSetOfACollection(); //<--- Still need work
             //LazyLoadingAndEagerLoadingSameResult();
-            DetectChanges();
+            //DetectChanges();
+            CreateNewInstance();
             Console.ReadLine();
+        }
+
+        private static void CreateNewInstance()
+        {
+            using (var context = new YourContext())
+            {
+                // Create a new instance with Add
+                var person = new Person {Name = "New person with New Keyword",BirthDate = DateTime.Now};
+                Console.WriteLine("Person non-proxy state: " + context.Entry(person).State);
+                context.Persons.Add(person);// Now Entity Framework added the object but was not tracking anything
+
+                // Create a new instance with Entity Framework (proxy)
+                var person2 = context.Persons.Create();
+                Console.WriteLine("Person proxy state: " + context.Entry(person2).State);
+                person2.Name = "New Person from EF";
+                person2.BirthDate = DateTime.Now;
+                context.Persons.Add(person2); // Still need to add but EF was tracking changes
+                var x1 = context.Persons.Local.Count();
+                Console.WriteLine("The count is at " + x1);
+
+                // Detect Changes
+                context.ChangeTracker.DetectChanges();
+                Console.WriteLine("Person non-proxy state: " + context.Entry(person).State);
+                Console.WriteLine("Person proxy state: " + context.Entry(person2).State);
+                var x2 = context.Persons.Local.Count();
+                Console.WriteLine("The count is at " + x2);
+
+                context.SaveChanges();
+            }
         }
 
         private static void DetectChanges()
