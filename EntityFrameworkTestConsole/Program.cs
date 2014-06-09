@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
@@ -34,8 +35,21 @@ namespace EntityFrameworkTestConsole
             //LoadASubSetOfACollection(); //<--- Still need work
             //LazyLoadingAndEagerLoadingSameResult();
             //DetectChanges();
-            CreateNewInstance();
+            //CreateNewInstance();
+            AddEntityFromTheRootThroughReferences();
             Console.ReadLine();
+        }
+
+        private static void AddEntityFromTheRootThroughReferences()
+        {
+            using (var context = new YourContext())
+            {
+                var newHouse = new House {Address = new Address{City="TestCity",Number = 123,Street="Street Name here"}};
+                newHouse.Owner = new Person {Name = "Automatically added from the property", BirthDate = DateTime.Now};
+                newHouse.Resident = new Collection<Person>(new []{new Person{BirthDate = DateTime.Now,Name = "Automatically added from the collection"}});
+                context.Houses.Add(newHouse);
+                context.SaveChanges();
+            }
         }
 
         private static void CreateNewInstance()

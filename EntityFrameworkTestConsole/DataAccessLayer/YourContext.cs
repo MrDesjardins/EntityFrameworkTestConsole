@@ -14,10 +14,10 @@ namespace EntityFrameworkTestConsole.DataAccessLayer
     {
         static YourContext()
         {
-            //Database.SetInitializer<YourContext>(new CreateDatabaseIfNotExists<YourContext>()); //Default one
+            Database.SetInitializer<YourContext>(new CreateDatabaseIfNotExists<YourContext>()); //Default one
             //Database.SetInitializer<YourContext>(new DropCreateDatabaseIfModelChanges<YourContext>()); //Drop database if changes detected
             //Database.SetInitializer<YourContext>(new DropCreateDatabaseAlways<YourContext>()); //Drop database every times
-            Database.SetInitializer<YourContext>(new CustomInitializer<YourContext>()); //Custom if model changed and seed values
+            //Database.SetInitializer<YourContext>(new CustomInitializer<YourContext>()); //Custom if model changed and seed values
             //Database.SetInitializer<YourContext>(null); //Nothing is done
             
         }
