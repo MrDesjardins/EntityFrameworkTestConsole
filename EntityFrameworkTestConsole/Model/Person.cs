@@ -37,6 +37,13 @@ namespace EntityFrameworkTestConsole.Model
         public string City { get; set; }
     }
 
-    
+    public class Car
+    {
+        public int Id { get; set; }
+        public string Type { get; set; }
+        public Person Owner { get; set; }
+        public int OwnerId { get; set; }
+    }
+
 
 }

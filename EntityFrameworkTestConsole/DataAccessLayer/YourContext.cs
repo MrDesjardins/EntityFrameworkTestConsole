@@ -28,6 +28,8 @@ namespace EntityFrameworkTestConsole.DataAccessLayer
         }
         public DbSet<Person> Persons { get; set; }
         public DbSet<House> Houses { get; set; }
+
+        public DbSet<Car> Cars { get; set; }
         //public DbSet<Address> Address { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

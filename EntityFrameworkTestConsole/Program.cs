@@ -36,8 +36,24 @@ namespace EntityFrameworkTestConsole
             //LazyLoadingAndEagerLoadingSameResult();
             //DetectChanges();
             //CreateNewInstance();
-            AddEntityFromTheRootThroughReferences();
+            //AddEntityFromTheRootThroughReferences();
+            AddByIdInsteadOfProperty();
             Console.ReadLine();
+        }
+
+        private static void AddByIdInsteadOfProperty()
+        {
+            using (var context = new YourContext())
+            {
+                var person = new Person { Name = "Automatically added from the property", BirthDate = DateTime.Now };
+                context.Set<Person>().Add(person);
+                context.SaveChanges();
+                Console.WriteLine("Person id = " + person.Id);
+                var car = new Car {OwnerId = person.Id, Type = "Honda"};
+                context.Set<Car>().Add(car);
+                context.SaveChanges();
+                Console.WriteLine("Car id = " + car.Id);
+            }
         }
 
         private static void AddEntityFromTheRootThroughReferences()
