@@ -3,6 +3,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
@@ -12,9 +13,9 @@ using EntityFrameworkTestConsole.Model;
 
 namespace EntityFrameworkTestConsole
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //BuildDatabase();
             //BuildByAddingEntity();
@@ -37,8 +38,73 @@ namespace EntityFrameworkTestConsole
             //DetectChanges();
             //CreateNewInstance();
             //AddEntityFromTheRootThroughReferences();
-            AddByIdInsteadOfProperty();
+            //AddByIdInsteadOfProperty();
+            WorkingWithEntryAndAllScalarProperties();
+            UpdatingASpecificFieldOfATable();
             Console.ReadLine();
+        }
+
+        private static void UpdatingASpecificFieldOfATable()
+        {
+            Person person;
+
+            //Create a person
+            using (var context = new YourContext())
+            {
+                person = new Person { Name = "Update only a single property", BirthDate = DateTime.Now };
+                context.Set<Person>().Add(person);
+                context.SaveChanges();
+            }
+
+            //Update a single field
+            using (var context = new YourContext())
+            {
+                context.Configuration.AutoDetectChangesEnabled = false;
+                context.Configuration.ProxyCreationEnabled = false;
+                context.Entry(person).State = EntityState.Unchanged; //In the context without any modification
+                person.BirthDate = new DateTime(1984, 08, 01);
+                person.Name = "This will not be saved in the database";
+                context.Entry(person).Property(d => d.BirthDate).IsModified = true;
+                //context.Entry(person).Property(d => d.Name).IsModified = false;
+                context.SaveChanges();
+            }
+        }
+
+        private static void WorkingWithEntryAndAllScalarProperties()
+        {
+            Person personLoaded;
+
+            //Create a person
+            using (var context = new YourContext())
+            {
+                var person = new Person { Name = "WorkingWithEntry", BirthDate = DateTime.Now };
+                context.Set<Person>().Add(person);
+                context.SaveChanges();
+            }
+
+            //Load the person
+            using (var context = new YourContext())
+            {
+                personLoaded = context.Set<Person>().Single(sd => sd.Name == "WorkingWithEntry");
+            }
+
+            personLoaded.Name = "Modified Name";
+
+            //Save the person (modified its properties)
+            using (var context = new YourContext())
+            {
+                context.Configuration.AutoDetectChangesEnabled = false;
+                context.Configuration.ProxyCreationEnabled = false;
+
+                context.Entry(personLoaded).State = EntityState.Modified;
+                context.SaveChanges();
+          
+                var copy = new Person();
+                context.Entry(copy).State = EntityState.Added;//The context must know the entity to do the copy to.
+                context.Entry(copy).CurrentValues.SetValues(personLoaded); //The context must also know the entity to copy from.
+                copy.Name = "This is a copy AKA clone";
+                context.SaveChanges();
+            }
         }
 
         private static void AddByIdInsteadOfProperty()
